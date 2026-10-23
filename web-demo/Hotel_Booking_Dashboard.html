@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Hotel Booking Dashboard</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=Instrument+Sans:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#EDF3F2;--card:#FBFDFC;--ink:#14283A;--mute:#5B6E7C;--line:#D3DFDD;--teal:#1F7A7A;--teal-rgb:31,122,122;--brass:#B8892B;--rose:#B83A4B;--on:#fff;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0F1D26;--card:#16293A;--ink:#E6F0EE;--mute:#93A8B4;--line:#27404F;--teal:#46B4AA;--teal-rgb:70,180,170;--brass:#D9AC4F;--rose:#E0707E}}
+:root[data-theme="dark"]{--bg:#0F1D26;--card:#16293A;--ink:#E6F0EE;--mute:#93A8B4;--line:#27404F;--teal:#46B4AA;--teal-rgb:70,180,170;--brass:#D9AC4F;--rose:#E0707E}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 15px/1.5 "Instrument Sans",system-ui,sans-serif}
+.wrap{max-width:1180px;margin:0 auto;padding:20px clamp(14px,3vw,28px) 40px}
+h1,.kv{font-family:Fraunces,Georgia,serif;font-weight:600}
+h1{font-size:clamp(26px,4vw,38px);margin:0 0 4px;letter-spacing:-.01em}
+.sub{color:var(--mute);margin:0 0 18px;max-width:62ch}
+.bar{display:flex;flex-wrap:wrap;gap:10px 22px;margin-bottom:18px}
+.grp{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.grp small{color:var(--mute);margin-right:2px}
+button{font:inherit;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:5px 14px;cursor:pointer}
+button[aria-pressed="true"]{background:var(--teal);border-color:var(--teal);color:var(--on)}
+button:focus-visible{outline:3px solid var(--brass);outline-offset:2px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin-bottom:16px}
+.k{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px}
+.k span{color:var(--mute);font-size:13px}.kv{display:block;font-size:26px;line-height:1.2;margin-top:2px}
+.k.hot{border-color:var(--rose)}.k.hot .kv{color:var(--rose)}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.p{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:16px;min-width:0}
+.p.wide{grid-column:1/-1}.p h2{font-size:16px;margin:0 0 2px;font-weight:600}.p>p{margin:0 0 12px;color:var(--mute);font-size:13px}
+.scroll{overflow-x:auto}
+.hm{display:grid;grid-template-columns:44px repeat(12,minmax(44px,1fr));gap:4px;min-width:600px}
+.hm div{border-radius:6px;padding:9px 0;text-align:center;font-size:13px;font-weight:600}
+.hm .h{color:var(--mute);font-weight:500;padding:2px 0}.hm .y{text-align:left;color:var(--mute);padding-left:2px}
+.leg{display:flex;align-items:center;gap:8px;margin-top:10px;font-size:12px;color:var(--mute)}
+.leg i{width:120px;height:8px;border-radius:4px;background:linear-gradient(90deg,rgba(var(--teal-rgb),.12),rgb(var(--teal-rgb)))}
+svg{width:100%;height:auto;display:block}.ax{fill:var(--mute);font-size:11px}
+.key{display:flex;gap:16px;font-size:12px;color:var(--mute);margin-top:6px}.key b{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px}
+.hb{display:grid;grid-template-columns:minmax(72px,34%) 1fr auto;gap:10px;align-items:center;margin:9px 0;font-size:13.5px}
+.ht{height:10px;background:var(--line);border-radius:5px;overflow:hidden}.ht i{display:block;height:100%;border-radius:5px}
+.ins{margin:0;padding-left:18px}.ins li{margin:0 0 9px;max-width:70ch}
+.note{color:var(--mute);font-size:12px;margin-top:22px}
+@media (prefers-reduced-motion:no-preference){.ht i{transition:width .35s}}
+</style></head><body><div class="wrap">
+<h1>Hotel booking performance</h1>
+<p class="sub">Chennai City Hotel (60 rooms) and ECR Beach Resort (40 rooms), arrivals January 2022 to December 2024. Pick years and a hotel to update every chart.</p>
+<div class="bar"><div class="grp" id="fy"><small>Year</small></div><div class="grp" id="fh"><small>Hotel</small></div></div>
+<div class="kpis" id="kpis"></div>
+<div class="grid">
+<section class="p wide"><h2>Occupancy by month</h2><p>Share of room-nights sold. Darker means fuller.</p><div class="scroll"><div class="hm" id="hm"></div></div><div class="leg">30%<i></i>90%</div></section>
+<section class="p wide"><h2>Revenue and cancellations through the year</h2><p>Bars show confirmed revenue. The line shows the share of bookings cancelled.</p><div id="mc"></div><div class="key"><span><b style="background:var(--brass)"></b>Revenue</span><span><b style="background:var(--rose)"></b>Cancellation rate</span></div></section>
+<section class="p"><h2>Cancellation rate by lead time</h2><p>Days between booking and arrival.</p><div id="c1"></div></section>
+<section class="p"><h2>Cancellation rate by market segment</h2><p>Where bookings are lost most often.</p><div id="c2"></div></section>
+<section class="p"><h2>Cancellation rate by deposit type</h2><p>How payment terms change behaviour.</p><div id="c3"></div></section>
+<section class="p"><h2>Revenue by guest country</h2><p>Top markets by confirmed revenue.</p><div id="c4"></div></section>
+<section class="p wide"><h2>What the data says</h2><p>Written from the current selection.</p><ul class="ins" id="ins"></ul></section>
+</div>
+<p class="note">Simulated dataset built for this project. Revenue is room rate multiplied by nights for confirmed bookings, counted in the month of arrival.</p>
+</div>
+<script>
+const D={"M":[[2022,0,0,750,205,5420947,2331519,1077,2755581,545,1051],[2022,0,1,627,178,4040842,1874922,873,2111672,449,882],[2022,0,2,618,158,4306264,1601096,910,2157797,460,896],[2022,0,3,550,139,3612363,1430551,824,1846235,411,831],[2022,0,4,606,177,3834408,1787412,852,1924545,429,842],[2022,0,5,487,137,2668551,1248557,680,1378933,350,701],[2022,0,6,478,113,2873788,956880,736,1445319,365,723],[2022,0,7,571,149,3655424,1342018,858,1803340,422,856],[2022,0,8,581,162,3876799,1477208,861,1860159,419,861],[2022,0,9,593,161,3732755,1487563,849,1887422,432,857],[2022,0,10,677,168,4985740,1695142,1071,2386416,509,1048],[2022,0,11,758,210,5323613,2299670,1046,2780894,548,1052],[2022,1,0,350,141,8867676,5906096,767,2424720,209,730],[2022,1,1,243,93,4873258,3087382,567,1269784,150,560],[2022,1,2,214,92,3647698,2772954,440,1009124,122,467],[2022,1,3,301,123,6298307,4223190,661,1679382,178,641],[2022,1,4,302,122,6217751,4269833,665,1675622,180,660],[2022,1,5,188,69,3550420,1782828,459,920539,119,465],[2022,1,6,191,75,3480295,2156051,441,871748,116,455],[2022,1,7,191,74,3389006,2105144,448,885078,117,433],[2022,1,8,189,69,3228148,1944547,422,923328,120,433],[2022,1,9,202,81,3372562,2386752,446,931811,121,445],[2022,1,10,217,90,3719298,2896137,464,1015347,127,471],[2022,1,11,361,145,9190201,6294609,808,2444282,216,775],[2023,0,0,858,218,6832400,2444517,1279,3418924,640,1285],[2023,0,1,713,203,4754583,2094870,997,2460256,510,999],[2023,0,2,686,172,4772216,1743527,1014,2442558,514,1023],[2023,0,3,609,151,4244180,1523507,915,2112502,458,907],[2023,0,4,629,171,4081751,1849775,874,2126658,458,882],[2023,0,5,597,156,3613327,1434892,903,1795523,441,902],[2023,0,6,581,159,3643461,1521494,863,1771205,422,872],[2023,0,7,599,160,3838280,1575148,867,1953330,439,851],[2023,0,8,670,195,4424954,1834030,945,2224702,475,956],[2023,0,9,705,212,4560034,2249251,978,2313318,493,975],[2023,0,10,762,210,5212363,2252604,1068,2701879,552,1060],[2023,0,11,880,243,6639630,2829711,1253,3355879,637,1253],[2023,1,0,375,142,9973374,6705501,822,2792471,233,816],[2023,1,1,245,97,4841737,3449494,556,1265717,148,591],[2023,1,2,300,121,6011631,4147022,654,1605713,179,625],[2023,1,3,295,111,6747024,4653860,677,1821477,184,703],[2023,1,4,302,109,7020334,3979793,705,1883484,193,693],[2023,1,5,237,93,4245084,3230507,539,1152921,144,553],[2023,1,6,203,85,3365226,2570874,434,934934,118,434],[2023,1,7,231,79,4780389,2332704,590,1209577,152,596],[2023,1,8,239,89,4615626,2736375,542,1283200,150,529],[2023,1,9,218,81,4572994,2439509,540,1128575,137,536],[2023,1,10,272,108,5585500,3338612,649,1376775,164,634],[2023,1,11,411,148,12157133,7136955,987,3196313,263,976],[2024,0,0,889,245,6705572,2659510,1201,3613015,644,1206],[2024,0,1,774,234,5435234,2500163,1089,2695471,540,1078],[2024,0,2,787,216,5697007,2350649,1128,2900923,571,1135],[2024,0,3,648,172,4609758,1704091,934,2358895,476,945],[2024,0,4,696,183,5187214,1826518,1063,2509857,513,1045],[2024,0,5,581,171,3593766,1609839,820,1796854,410,828],[2024,0,6,585,164,3587703,1586439,817,1844143,421,816],[2024,0,7,664,167,4404669,1712720,961,2320823,497,973],[2024,0,8,750,220,5222462,2349197,1067,2567113,530,1052],[2024,0,9,739,239,4649317,2525914,986,2401200,500,981],[2024,0,10,844,223,6293706,2520207,1241,3149684,621,1237],[2024,0,11,922,265,6971424,3216749,1242,3692747,657,1227],[2024,1,0,437,185,11865249,9474495,949,3146611,252,967],[2024,1,1,302,111,6513508,4009738,702,1815330,191,689],[2024,1,2,314,128,7174847,4734279,728,1782881,186,736],[2024,1,3,316,124,7372767,5343263,705,1963365,192,711],[2024,1,4,392,146,9271673,5728036,890,2550583,246,884],[2024,1,5,232,89,4599160,2712648,554,1199897,143,585],[2024,1,6,220,84,4124532,2789344,510,1084897,136,502],[2024,1,7,256,103,4759227,2992458,565,1269680,153,557],[2024,1,8,252,108,4487429,3683026,554,1180845,144,545],[2024,1,9,234,86,4273060,2505438,524,1187840,148,559],[2024,1,10,272,131,5154693,4550220,552,1293552,141,530],[2024,1,11,439,165,12225574,8328120,995,3312630,274,989]],"dims":{"lead":{"labels":["0-7 days","8-30 days","31-90 days","90+ days"],"rows":[[2022,0,0,1503,193,11157324],[2022,0,1,2458,479,17582183],[2022,0,2,2146,655,14128496],[2022,0,3,1189,630,5463490],[2022,1,0,264,59,6456693],[2022,1,1,667,168,16837601],[2022,1,2,987,351,21060723],[2022,1,3,1031,596,15479603],[2023,0,0,1667,231,12484237],[2023,0,1,2874,526,21519131],[2023,0,2,2428,776,16642841],[2023,0,3,1320,717,5970968],[2023,1,0,307,61,8097125],[2023,1,1,746,181,19354467],[2023,1,2,1142,359,27996281],[2023,1,3,1133,662,18468179],[2024,0,0,1722,234,13861872],[2024,0,1,3089,577,23999143],[2024,0,2,2651,872,18320722],[2024,0,3,1417,816,6176096],[2024,1,0,350,73,9503595],[2024,1,1,851,224,22601590],[2024,1,2,1255,449,31146785],[2024,1,3,1210,714,18569748]]},"seg":{"labels":["Complementary","Corporate","Direct","Groups","Offline TA/TO","Online TA"],"rows":[[2022,0,0,146,4,0],[2022,0,1,1870,138,13199740],[2022,0,2,1301,216,11311224],[2022,0,3,582,254,2984103],[2022,0,4,833,259,5827961],[2022,0,5,2564,1086,15008465],[2022,1,0,57,6,0],[2022,1,1,95,11,1438797],[2022,1,2,577,107,17625316],[2022,1,3,368,191,5534751],[2022,1,4,545,198,11896939],[2022,1,5,1307,661,23338817],[2023,0,0,163,4,0],[2023,0,1,2114,182,15048780],[2023,0,2,1506,235,14098598],[2023,0,3,661,273,3468353],[2023,0,4,939,297,6688805],[2023,0,5,2906,1259,17312641],[2023,1,0,73,1,0],[2023,1,1,110,8,1961349],[2023,1,2,697,128,23340660],[2023,1,3,397,204,6538242],[2023,1,4,606,213,14209844],[2023,1,5,1445,709,27865956],[2024,0,0,168,5,0],[2024,0,1,2271,218,17243074],[2024,0,2,1598,243,15536973],[2024,0,3,701,322,3319153],[2024,0,4,1055,308,7967062],[2024,0,5,3086,1403,18291571],[2024,1,0,69,3,0],[2024,1,1,98,11,1742350],[2024,1,2,709,146,23738603],[2024,1,3,467,246,7453075],[2024,1,4,671,253,15516953],[2024,1,5,1652,801,33370736]]},"dep":{"labels":["No Deposit","Non Refund","Refundable"],"rows":[[2022,0,0,5777,1686,36824542],[2022,0,1,925,94,7600849],[2022,0,2,594,177,3906102],[2022,1,0,2353,1013,44625359],[2022,1,1,365,48,10790149],[2022,1,2,231,113,4419112],[2023,0,0,6641,1947,44344276],[2023,0,1,988,90,8150970],[2023,0,2,660,213,4121931],[2023,1,0,2653,1084,56117362],[2023,1,1,421,64,12986093],[2023,1,2,254,115,4812598],[2024,0,0,7090,2181,47786339],[2024,0,1,1090,83,10180925],[2024,0,2,699,235,4390568],[2024,1,0,2924,1257,62021788],[2024,1,1,434,63,13749273],[2024,1,2,308,140,6050657]]},"cty":{"labels":["Australia","France","Germany","India","Malaysia","Singapore","Sri Lanka","United Arab Emirates","United Kingdom","United States","Unknown"],"rows":[[2022,0,0,113,44,714677],[2022,0,1,104,41,592295],[2022,0,2,165,64,993346],[2022,0,3,5554,1296,38045058],[2022,0,4,115,39,679821],[2022,0,5,202,77,1236021],[2022,0,6,119,54,564799],[2022,0,7,257,97,1484267],[2022,0,8,292,117,1642097],[2022,0,9,268,98,1696741],[2022,0,10,107,30,682370],[2022,1,0,112,57,1797890],[2022,1,1,146,75,2579380],[2022,1,2,182,78,3253278],[2022,1,3,1311,437,28812031],[2022,1,4,108,51,2154970],[2022,1,5,167,70,3266635],[2022,1,6,113,55,2111748],[2022,1,7,197,76,4413356],[2022,1,8,306,147,5052495],[2022,1,9,266,116,5391554],[2022,1,10,41,12,1001283],[2023,0,0,117,45,831729],[2023,0,1,113,48,679221],[2023,0,2,171,60,1024199],[2023,0,3,6330,1499,44896847],[2023,0,4,135,52,784071],[2023,0,5,256,97,1569904],[2023,0,6,123,51,715400],[2023,0,7,300,119,1657916],[2023,0,8,310,115,1891621],[2023,0,9,304,130,1647230],[2023,0,10,130,34,919040],[2023,1,0,129,61,2575094],[2023,1,1,156,63,3108220],[2023,1,2,211,97,4318377],[2023,1,3,1482,459,36123043],[2023,1,4,122,52,2549187],[2023,1,5,212,92,5059348],[2023,1,6,141,51,3103791],[2023,1,7,194,92,3545466],[2023,1,8,323,146,5940727],[2023,1,9,319,137,6846168],[2023,1,10,39,13,746631],[2024,0,0,127,50,811182],[2024,0,1,140,53,931562],[2024,0,2,192,75,1175166],[2024,0,3,6669,1658,47807322],[2024,0,4,148,58,947217],[2024,0,5,265,105,1751421],[2024,0,6,129,50,755306],[2024,0,7,350,134,2326295],[2024,0,8,364,137,2478609],[2024,0,9,362,146,2421770],[2024,0,10,133,33,951982],[2024,1,0,161,77,3156608],[2024,1,1,185,90,3741269],[2024,1,2,200,88,4712264],[2024,1,3,1664,569,38603785],[2024,1,4,136,55,3407603],[2024,1,5,270,119,5748180],[2024,1,6,135,59,3016249],[2024,1,7,253,110,5502669],[2024,1,8,327,139,6779247],[2024,1,9,285,130,6017698],[2024,1,10,50,24,1136145]]}},"rooms":[60,40],"hn":["Chennai City Hotel","ECR Beach Resort"]};
+const MN=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+let yrs=new Set([2022,2023,2024]),hot=-1;
+const $=s=>document.getElementById(s),sum=(a,f)=>a.reduce((t,r)=>t+f(r),0);
+const cr=v=>"\u20B9"+(v/1e7).toFixed(2)+" Cr",pc=v=>(v*100).toFixed(1)+"%",nf=v=>v.toLocaleString("en-IN");
+const ok=r=>yrs.has(r[0])&&(hot<0||r[1]==hot);
+const dim=(r)=>new Date(r[0],r[2]+1,0).getDate();
+function chips(id,items,on,fn){const g=$(id);g.querySelectorAll("button").forEach(b=>b.remove());items.forEach(([l,v])=>{const b=document.createElement("button");b.textContent=l;b.setAttribute("aria-pressed",on(v));b.onclick=()=>{fn(v);draw()};g.appendChild(b)})}
+function agg(n){const d=D.dims[n],m={};d.rows.filter(ok).forEach(r=>{const a=m[r[2]]||(m[r[2]]=[0,0,0]);a[0]+=r[3];a[1]+=r[4];a[2]+=r[5]});return Object.keys(m).map(i=>({i:+i,l:d.labels[i],b:m[i][0],c:m[i][1],rev:m[i][2],rate:m[i][0]?m[i][1]/m[i][0]:0}))}
+function hbar(it,fmt,col){const mx=Math.max(...it.map(x=>x.v),1e-9);return it.map(x=>`<div class="hb"><span>${x.l}</span><span class="ht"><i style="width:${x.v/mx*100}%;background:${col}"></i></span><b>${fmt(x.v)}</b></div>`).join("")}
+function occ(rows){const cap=sum(rows,r=>D.rooms[r[1]]*dim(r));return cap?sum(rows,r=>r[10])/cap:0}
+function draw(){
+const R=D.M.filter(ok),b=sum(R,r=>r[3]),c=sum(R,r=>r[4]),rev=sum(R,r=>r[5]),lost=sum(R,r=>r[6]),an=sum(R,r=>r[9]);
+chips("fy",[2022,2023,2024].map(y=>[y,y]),v=>yrs.has(v),v=>{yrs.has(v)?(yrs.size>1&&yrs.delete(v)):yrs.add(v)});
+chips("fh",[["Both",-1],["City hotel",0],["Resort",1]],v=>hot===v,v=>{hot=v});
+$("kpis").innerHTML=[["Bookings",nf(b)],["Revenue",cr(rev)],["Cancellation rate",pc(b?c/b:0)],["Average daily rate","\u20B9"+nf(Math.round(an?sum(R,r=>r[8])/an:0))],["Occupancy",pc(occ(R))],["Revenue lost to cancellations",cr(lost),1]].map(k=>`<div class="k${k[2]?" hot":""}"><span>${k[0]}</span><b class="kv">${k[1]}</b></div>`).join("");
+let h='<div></div>'+MN.map(m=>`<div class="h">${m}</div>`).join("");
+[...yrs].sort().forEach(y=>{h+=`<div class="y">${y}</div>`;for(let m=0;m<12;m++){const o=occ(R.filter(r=>r[0]===y&&r[2]===m)),a=Math.min(1,Math.max(.12,(o-.3)/.6*.88+.12));h+=`<div title="${MN[m]} ${y}: ${pc(o)}" style="background:rgba(var(--teal-rgb),${a.toFixed(2)});color:${a>.55?"var(--on)":"var(--ink)"}">${Math.round(o*100)}</div>`}});
+$("hm").innerHTML=h;
+const rv=Array(12).fill(0),bb=Array(12).fill(0),cc=Array(12).fill(0);R.forEach(r=>{rv[r[2]]+=r[5];bb[r[2]]+=r[3];cc[r[2]]+=r[4]});
+const mx=Math.max(...rv,1),W=600,H=190,w=W/12;let s=`<svg viewBox="0 0 ${W} ${H+26}" role="img" aria-label="Revenue and cancellation rate by month">`,pt=[];
+rv.forEach((v,i)=>{const t=v/mx*H,rt=bb[i]?cc[i]/bb[i]:0;s+=`<rect x="${i*w+8}" y="${H-t}" width="${w-16}" height="${t}" rx="3" fill="var(--brass)"><title>${MN[i]}: ${cr(v)}</title></rect><text class="ax" x="${i*w+w/2}" y="${H+16}" text-anchor="middle">${MN[i]}</text>`;pt.push([i*w+w/2,H-Math.min(rt/.6,1)*H,rt])});
+s+=`<polyline points="${pt.map(p=>p[0]+","+p[1]).join(" ")}" fill="none" stroke="var(--rose)" stroke-width="2.5"/>`;pt.forEach((p,i)=>s+=`<circle cx="${p[0]}" cy="${p[1]}" r="4" fill="var(--rose)"><title>${MN[i]}: ${pc(p[2])} cancelled</title></circle>`);
+$("mc").innerHTML=s+"</svg>";
+const L=agg("lead").sort((a,b)=>a.i-b.i),S=agg("seg").sort((a,b)=>b.rate-a.rate),Dp=agg("dep").sort((a,b)=>b.rate-a.rate),C=agg("cty").sort((a,b)=>b.rev-a.rev);
+$("c1").innerHTML=hbar(L.map(x=>({l:x.l,v:x.rate})),pc,"var(--rose)");
+$("c2").innerHTML=hbar(S.map(x=>({l:x.l,v:x.rate})),pc,"var(--rose)");
+$("c3").innerHTML=hbar(Dp.map(x=>({l:x.l,v:x.rate})),pc,"var(--rose)");
+$("c4").innerHTML=hbar(C.slice(0,8).map(x=>({l:x.l,v:x.rev})),cr,"var(--teal)");
+const pk=rv.indexOf(Math.max(...rv)),lo=rv.indexOf(Math.min(...rv)),ls=L[L.length-1],lf=L[0],sh=S[0],sl=S[S.length-1],dh=Dp[0],dl=Dp[Dp.length-1],tc=C[0];
+$("ins").innerHTML=[
+`${MN[pk]} is the strongest month for revenue (${cr(rv[pk])}) and ${MN[lo]} the weakest (${cr(rv[lo])}), so pricing and staffing should follow that swing.`,
+`Bookings made ${ls.l} ahead are cancelled ${pc(ls.rate)} of the time, against ${pc(lf.rate)} for ${lf.l}. Early bookers need a deposit or a reminder.`,
+`${sh.l} bookings cancel most (${pc(sh.rate)}) while ${sl.l} cancel least (${pc(sl.rate)}).`,
+`${dh.l} bookings cancel ${pc(dh.rate)} and ${dl.l} only ${pc(dl.rate)}, so payment terms clearly change guest behaviour.`,
+`${tc.l} brings ${pc(rev?tc.rev/rev:0)} of confirmed revenue, and cancellations cost ${cr(lost)} in total.`
+].map(t=>`<li>${t}</li>`).join("")}
+draw();
+</script></body></html>

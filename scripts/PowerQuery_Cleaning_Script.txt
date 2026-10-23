@@ -1,0 +1,56 @@
+let
+    // 1. Load the raw CSV (change the path if your file is somewhere else)
+    Source = Csv.Document(File.Contents("C:\Users\praveen kumar\OneDrive\Desktop\Powerbi project\hotel_bookings.csv"),[Delimiter=",", Columns=31, Encoding=65001, QuoteStyle=QuoteStyle.None]),
+
+    // 2. Use first row as headers
+    PromotedHeaders = Table.PromoteHeaders(Source, [PromoteAllScalars=true]),
+
+    // 3. Set data types
+    ChangedTypes = Table.TransformColumnTypes(PromotedHeaders, {
+        {"booking_id", type text}, {"hotel_id", type text}, {"hotel", type text},
+        {"booking_date", type date}, {"arrival_date", type date}, {"departure_date", type date},
+        {"lead_time", Int64.Type}, {"stays_in_weekend_nights", Int64.Type}, {"stays_in_week_nights", Int64.Type},
+        {"adults", Int64.Type}, {"children", Int64.Type}, {"babies", Int64.Type},
+        {"meal_plan", type text}, {"country", type text}, {"market_segment", type text},
+        {"distribution_channel", type text}, {"customer_type", type text},
+        {"is_repeated_guest", Int64.Type}, {"previous_cancellations", Int64.Type},
+        {"previous_bookings_not_canceled", Int64.Type}, {"room_type_reserved", type text},
+        {"room_type_assigned", type text}, {"booking_changes", Int64.Type}, {"deposit_type", type text},
+        {"waiting_list_days", Int64.Type}, {"adr_inr", Currency.Type}, {"parking_spaces", Int64.Type},
+        {"special_requests", Int64.Type}, {"is_canceled", Int64.Type}, {"reservation_status", type text},
+        {"reservation_status_date", type date}}, "en-US"),
+
+    // 4. Trim extra spaces in text columns
+    TrimmedText = Table.TransformColumns(ChangedTypes, List.Transform(
+        {"booking_id","hotel_id","hotel","meal_plan","country","market_segment","distribution_channel",
+         "customer_type","room_type_reserved","room_type_assigned","deposit_type","reservation_status"},
+        each {_, Text.Trim, type text})),
+
+    // 5. Remove duplicate bookings
+    RemovedDuplicates = Table.Distinct(TrimmedText, {"booking_id"}),
+
+    // 6. Replace blank children with 0
+    FixedChildren = Table.ReplaceValue(RemovedDuplicates, null, 0, Replacer.ReplaceValue, {"children"}),
+
+    // 7. Replace blank country with "Unknown"
+    FixedCountry1 = Table.ReplaceValue(FixedChildren, null, "Unknown", Replacer.ReplaceValue, {"country"}),
+    FixedCountry = Table.ReplaceValue(FixedCountry1, "", "Unknown", Replacer.ReplaceValue, {"country"}),
+
+    // 8. Add Total Guests and remove bookings with zero guests
+    AddTotalGuests = Table.AddColumn(FixedCountry, "Total Guests", each [adults] + [children] + [babies], Int64.Type),
+    RemovedZeroGuests = Table.SelectRows(AddTotalGuests, each [Total Guests] > 0),
+
+    // 9. Remove negative prices
+    RemovedNegativeADR = Table.SelectRows(RemovedZeroGuests, each [adr_inr] >= 0),
+
+    // 10. Remove extreme price outliers (limit set per hotel)
+    RemovedOutliers = Table.SelectRows(RemovedNegativeADR, each not (([hotel_id] = "H01" and [adr_inr] > 15000) or ([hotel_id] = "H02" and [adr_inr] > 30000))),
+
+    // 11. New columns
+    AddTotalNights = Table.AddColumn(RemovedOutliers, "Total Nights", each [stays_in_weekend_nights] + [stays_in_week_nights], Int64.Type),
+    AddBookingStatus = Table.AddColumn(AddTotalNights, "Booking Status", each if [is_canceled] = 1 then "Cancelled" else "Confirmed", type text),
+    AddLeadBucket = Table.AddColumn(AddBookingStatus, "Lead Time Bucket", each if [lead_time] <= 7 then "0-7 days" else if [lead_time] <= 30 then "8-30 days" else if [lead_time] <= 90 then "31-90 days" else "90+ days", type text),
+    AddRevenue = Table.AddColumn(AddLeadBucket, "Booking Revenue", each if [is_canceled] = 0 then [adr_inr] * [Total Nights] else 0, Currency.Type),
+    AddLostRevenue = Table.AddColumn(AddRevenue, "Lost Revenue", each if [is_canceled] = 1 then [adr_inr] * [Total Nights] else 0, Currency.Type)
+in
+    AddLostRevenue

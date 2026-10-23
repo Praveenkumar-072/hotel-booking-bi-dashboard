@@ -1,0 +1,17 @@
+{
+  "name": "Hotel Teal",
+  "dataColors": ["#1F7A7A", "#B8892B", "#B83A4B", "#14283A", "#46B4AA", "#D9AC4F", "#E0707E", "#5B6E7C"],
+  "background": "#FBFDFC",
+  "foreground": "#14283A",
+  "tableAccent": "#1F7A7A",
+  "good": "#1F7A7A",
+  "neutral": "#B8892B",
+  "bad": "#B83A4B",
+  "visualStyles": {
+    "page": {
+      "*": {
+        "background": [{ "color": { "solid": { "color": "#EDF3F2" } }, "transparency": 0 }]
+      }
+    }
+  }
+}
